@@ -11,7 +11,7 @@ class Giphy
   def random_gif(tag)
     request_uri = build_request_uri 'random', tag: tag
     json = get_request request_uri
-    !json['data'].empty? ? json['data']['image_original_url'] : nil
+    json.key?('data') ? json['data']['image_original_url'] : nil
   end
 
   private
