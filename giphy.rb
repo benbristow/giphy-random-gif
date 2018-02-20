@@ -6,7 +6,7 @@ require 'json'
 
 class Giphy
   API_URL = 'http://api.giphy.com/v1/gifs/'
-  API_KEY = 'dc6zaTOxFJmzC'
+  API_KEY = 'dc6zaTOxFJmzC' # not my key
 
   def random_gif(tag)
     request_uri = build_request_uri 'random', tag: tag
