@@ -1,58 +1,60 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'open-uri'
 require 'json'
 
 class Giphy
-  API_URL = "http://api.giphy.com/v1/gifs/"
-  API_KEY = "dc6zaTOxFJmzC"
+  API_URL = 'http://api.giphy.com/v1/gifs/'
+  API_KEY = 'dc6zaTOxFJmzC'
 
-  def random_gif tag
-    request_uri = build_request_uri "random", {:tag => tag}
+  def random_gif(tag)
+    request_uri = build_request_uri 'random', tag: tag
     json = get_request request_uri
-    json["data"].length > 0 ? json["data"]["image_original_url"] : nil
+    !json['data'].empty? ? json['data']['image_original_url'] : nil
   end
 
   private
 
-  def get_request uri
+  def get_request(uri)
     JSON.parse(open(uri).read)
   end
 
-  def build_request_uri path, params
+  def build_request_uri(path, params)
     params[:api_key] = API_KEY
     encoded = URI.encode_www_form(params)
     "#{API_URL}#{path}?#{encoded}"
   end
-
 end
 
-def main
-  tag = ARGV.join(" ")
-
-  if tag.nil? || tag == ""
-    puts "No tag provided"
-    return
+class RandomGiphy
+  def initialize
+    puts "Searching Giphy for random GIF with tag #{tag}..."
+    gif_url = Giphy.new.random_gif tag
+    throw "No GIF found for tag #{tag} :(" if gif_url.nil?
+    save_file!(gif_url)
   end
 
-  puts "Searching GIPHY for random GIF with tag #{tag}..."
+  private
 
-  giphy = Giphy.new
-  gif_url = giphy.random_gif tag
-
-  if gif_url.nil?
-    puts "No GIF found for tag #{tag} :("
-    return
-  else
-    puts "Found GIF. Downloading!"
-    save_file_name = tag.gsub(' ', '-')
-    File.open("#{save_file_name}.gif", "wb") do |save_file|
-      open(gif_url, "rb") do |gif_file|
-        save_file.write(gif_file.read)
-        puts "GIF saved to #{save_file_name}.gif"
+  def save_file!(gif_url)
+    File.open("#{file_name}.gif", 'wb') do |output_file|
+      open(gif_url, 'rb') do |gif_file|
+        output_file.write(gif_file.read)
+        puts "GIF saved to #{file_name}.gif"
       end
     end
   end
+
+  def file_name
+    tag.tr(' ', '-')
+  end
+
+  def tag
+    input = ARGV.join(' ')
+    throw 'No tag provided' if input.empty?
+    input
+  end
 end
 
-main
+RandomGiphy.new
