@@ -6,18 +6,19 @@ require 'json'
 
 class Giphy
   API_URL = 'http://api.giphy.com/v1/gifs/'
-  API_KEY = 'dc6zaTOxFJmzC' # not my key
+  API_KEY = 'thZMTtWsaBQAPDIAY461GzYTctuYIeIj' # not my key
 
   def random_gif(tag)
     request_uri = build_request_uri 'random', tag: tag
     json = get_request request_uri
-    json.key?('data') ? json['data']['image_original_url'] : nil
+    puts request_uri
+    json.key?('data') ? json['data']['images']['original']['url'] : nil
   end
 
   private
 
   def get_request(uri)
-    JSON.parse(open(uri).read)
+    JSON.parse(URI.open(uri).read)
   end
 
   def build_request_uri(path, params)
@@ -39,7 +40,7 @@ class RandomGiphy
 
   def save_file!(gif_url)
     File.open("#{file_name}.gif", 'wb') do |output_file|
-      open(gif_url, 'rb') do |gif_file|
+      URI.open(gif_url, 'rb') do |gif_file|
         output_file.write(gif_file.read)
         puts "GIF saved to #{file_name}.gif"
       end
